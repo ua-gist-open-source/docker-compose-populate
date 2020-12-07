@@ -28,16 +28,18 @@ fi
 
 
 # CREATE WORKSPACE
-docker-compose run populate curl -u admin:geoserver -XPOST http://geoserver:8080/geoserver/rest/workspaces -d '
-{ 
-  "name": "osm" 
+curl -v -u admin:geoserver -H "Content-type: application/json" -XPOST http://geoserver:8080/geoserver/rest/workspaces -d '
+{
+  "workspace" : {
+    "name": "osm"
+  }
 }'
 
 # CREATE DATASTORE
-docker-compose run populate curl -u admin:geoserver -XPOST http://geoserver:8080/geoserver/rest/workspaces/osm/datastores -d '
+curl -v -u admin:geoserver -H 'Content-type: application/json' -XPOST http://geoserver:8080/geoserver/rest/workspaces/osm/datastores -d '
 {
   "dataStore": {
-    "name": "nyc",
+    "name": "osm",
     "connectionParameters": {
       "entry": [
         {"@key":"host","$":"'${DB_HOST}'"},
@@ -50,6 +52,7 @@ docker-compose run populate curl -u admin:geoserver -XPOST http://geoserver:8080
     }
   }
 }'
+
 
 TABLES=$(psql -t -U $DB_USER -d $DATABASE -h $DB_HOST -c "select t.table_name from information_schema.tables t where t.table_schema='public' and t.table_type='BASE TABLE' and table_name<>'spatial_ref_sys' order by t.table_name;")
 
@@ -68,13 +71,7 @@ for TABLE in $TABLES; do
       "name": "osm",
       "href": "http://geoserver:8080/geoserver/rest/namespaces/osm.json"
     },
-    "title": "landuse_a",
-    "keywords": {
-      "string": [
-        "features",
-        "landuse_a"
-      ]
-    },
+    "title": "'${TABLE}'",
     "nativeCRS": "EPSG:4326",
     "srs": "EPSG:4326",
     "nativeBoundingBox": {
@@ -99,6 +96,7 @@ for TABLE in $TABLES; do
     },
   }
 }'
+
 done
 
 LAYER_GROUP='{
@@ -107,7 +105,21 @@ LAYER_GROUP='{
     "mode": "SINGLE",
     "publishables": {
       "published": [
-        '${PUBLISHED}'
+        {
+          "@type": "layer",
+          "name": "osm:landuse_a",
+          "href": "http://localhost:8080/geoserver/rest/workspaces/osm/layers/landuse_a.json"
+        },
+        {
+          "@type": "layer",
+          "name": "osm:roads",
+          "href": "http://localhost:8080/geoserver/rest/workspaces/osm/layers/roads.json"
+        },
+        {
+          "@type": "layer",
+          "name": "osm:nature",
+          "href": "http://localhost:8080/geoserver/rest/workspaces/osm/layers/nature.json"
+        }
       ]
     },
     "bounds": {
@@ -116,7 +128,7 @@ LAYER_GROUP='{
       "miny": '${TOT_MINY}',
       "maxy": '${TOT_MAXY}',
       "crs": "EPSG:4326"
-    },
-    "dateCreated": "2020-12-07 00:27:14.944 UTC"
+    }
   }
 }'
+curl -v -u admin:geoserver -H 'Content-type: application/json' -XPOST http://geoserver:8080/geoserver/rest/layergroups/ -d "$LAYER_GROUP"
