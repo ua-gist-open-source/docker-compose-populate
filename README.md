@@ -1,8 +1,8 @@
 # docker-compose-populate
 ```
 version=1.0
-docker build . -t aaryno/populate-docker-geo
-docker push aaryno/populate-docker-geo
+docker build . -t aaryno/populate-docker-webgis
+docker push aaryno/populate-docker-webgis
 ```
 To populate PostGIS with Hawaii OSM data:
 ```
