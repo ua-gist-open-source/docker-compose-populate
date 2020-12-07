@@ -8,8 +8,6 @@ ENV DB_USER postgres
 ENV DB_HOST postgis
 ENV DB_PORT 5432
 
-ADD scripts /populate-bin
+ADD scripts /
 
-RUN chmod 755 /populate_bin/*
-
-CMD ["/populate_all.sh"]
+RUN chmod 755 /populate_*
