@@ -8,6 +8,6 @@ ENV DB_USER postgres
 ENV DB_HOST postgis
 ENV DB_PORT 5432
 
-ADD scripts /bin
+ADD scripts /pbin
 
-RUN chmod 755 /bin/populate_*
+RUN chmod 755 /pbin/*
