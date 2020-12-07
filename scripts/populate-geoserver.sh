@@ -10,7 +10,12 @@ then
     echo "DB_USER is required"
     exit 1
 fi
-if [[ -z $DB_PORT ]]
+if [[ -z $DB_PASSWORD ]]
+then
+    echo "DB_USER is required"
+    exit 1
+fi
+if [[ -z $DB_PASSWORD ]]
 then
     echo "DB_PORT is required"
     exit 1
@@ -20,6 +25,31 @@ then
     echo "DATABASE is required"
     exit 1
 fi
+
+
+# CREATE WORKSPACE
+docker-compose run populate curl -u admin:geoserver -XPOST http://geoserver:8080/geoserver/rest/workspaces -d '
+{ 
+  "name": "osm" 
+}'
+
+# CREATE DATASTORE
+docker-compose run populate curl -u admin:geoserver -XPOST http://geoserver:8080/geoserver/rest/workspaces/osm/datastores -d '
+{
+  "dataStore": {
+    "name": "nyc",
+    "connectionParameters": {
+      "entry": [
+        {"@key":"host","$":"'${DB_HOST}'"},
+        {"@key":"port","$":"'${DB_PORT}'"},
+        {"@key":"database","$":"'${DATABASE}'"},
+        {"@key":"user","$":"'${DB_USER}'"},
+        {"@key":"passwd","$":"'${DB_PASSWORD}'"},
+        {"@key":"dbtype","$":"postgis"}
+      ]
+    }
+  }
+}'
 
 TABLES=$(psql -t -U $DB_USER -d $DATABASE -h $DB_HOST -c "select t.table_name from information_schema.tables t where t.table_schema='public' and t.table_type='BASE TABLE' and table_name<>'spatial_ref_sys' order by t.table_name;")
 
