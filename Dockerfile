@@ -10,7 +10,6 @@ ENV DB_HOST postgis
 ENV DB_PORT 5432
 
 COPY scripts /app
-COPY slds /slds
 RUN chmod 755 /app/*
 ENV PATH=/app:$PATH
 

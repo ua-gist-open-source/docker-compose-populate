@@ -25,7 +25,11 @@ then
 	echo "STATE is required"
 	exit 1
 fi
-curl http://download.geofabrik.de/north-america/us/${STATE}-latest-free.shp.zip -o ${STATE}-latest-free.shp.zip
+if [[ -z $REGION ]]
+then
+	REGION="north-america/us"
+fi
+curl http://download.geofabrik.de/${REGION}/${STATE}-latest-free.shp.zip -o ${STATE}-latest-free.shp.zip
 
 # Unzip
 unzip ${STATE}-latest-free.shp.zip
