@@ -15,4 +15,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag aaryno/populate-docker-geo
+      run: docker build . --file Dockerfile --tag aaryno/populate-osm-geofabrik
+    - name: Push the Docker image
+      run: docker push aaryno/populate-osm-geofabrik
